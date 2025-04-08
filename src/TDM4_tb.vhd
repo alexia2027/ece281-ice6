@@ -44,65 +44,89 @@
 --|
 --+----------------------------------------------------------------------------
 library ieee;
-  use ieee.std_logic_1164.all;
-  use ieee.numeric_std.all;
-  
+use ieee.std_logic_1164.all;
+use ieee.numeric_std.all;
+
 entity TDM4_tb is
 end TDM4_tb;
 
 architecture test_bench of TDM4_tb is 	
-  
-	component TDM4 is
-		-- fill in from TDM4.vhd
 
+	-- Component Declaration
+	component TDM4 is
+		generic (k_WIDTH : natural := 4);
+		port (
+			i_clk   : in  std_logic;
+			i_reset : in  std_logic;
+			i_D3    : in  std_logic_vector(k_WIDTH - 1 downto 0);
+			i_D2    : in  std_logic_vector(k_WIDTH - 1 downto 0);
+			i_D1    : in  std_logic_vector(k_WIDTH - 1 downto 0);
+			i_D0    : in  std_logic_vector(k_WIDTH - 1 downto 0);
+			o_data  : out std_logic_vector(k_WIDTH - 1 downto 0);
+			o_sel   : out std_logic_vector(3 downto 0)
+		);
 	end component TDM4;
 
-	-- Setup test clk (20 ns --> 50 MHz) and other signals
-	
 	-- Constants
-	constant k_IO_WIDTH : natural := 4;
+	constant k_IO_WIDTH   : natural := 4;
+	constant k_clk_period : time := 20 ns;
+
 	-- Signals
-	
+	signal w_clk   : std_logic := '0';
+	signal w_reset : std_logic := '0';
+	signal w_D3, w_D2, w_D1, w_D0 : std_logic_vector(k_IO_WIDTH - 1 downto 0);
+	signal f_data                 : std_logic_vector(k_IO_WIDTH - 1 downto 0);
+	signal f_sel_n               : std_logic_vector(3 downto 0);
+
 begin
 	-- PORT MAPS ----------------------------------------
-	-- map ports for any component instances (port mapping is like wiring hardware)
 	uut_inst : TDM4 
-	generic map ( k_WIDTH =>  )
-	port map ( 
-       i_clk   => 
-       i_reset => 
-       i_D3    => 
-       i_D2    => 
-       i_D1    => 
-       i_D0    => 
-       o_data  => 
-       o_sel   => 
-	);
+		generic map ( k_WIDTH => k_IO_WIDTH )
+		port map ( 
+			i_clk   => w_clk,
+			i_reset => w_reset,
+			i_D3    => w_D3,
+			i_D2    => w_D2,
+			i_D1    => w_D1,
+			i_D0    => w_D0,
+			o_data  => f_data,
+			o_sel   => f_sel_n
+		);
 	-----------------------------------------------------	
-	
-	-- PROCESSES ----------------------------------------	
+
 	-- Clock Process ------------------------------------
 	clk_process : process
 	begin
-
-
-
+		while true loop
+			w_clk <= '0';
+			wait for k_clk_period / 2;
+			w_clk <= '1';
+			wait for k_clk_period / 2;
+		end loop;
 	end process clk_process;
 	-----------------------------------------------------	
-	
+
 	-- Test Plan Process --------------------------------
 	test_process : process 
 	begin
 		-- assign test values to data inputs
+		w_D3 <= "1100";
+		w_D2 <= "1001";
+		w_D1 <= "0110";
+		w_D0 <= "0011";
 
-				
 		-- reset the system first
 		w_reset <= '1';
 		wait for k_clk_period;		
 		w_reset <= '0';
-		
-		wait; -- let the TDM do its work
+
+		-- let the simulation run for a while
+		wait for 200 ns;
+
+		-- end simulation
+		wait;
 	end process;	
 	-----------------------------------------------------	
-	
+
 end test_bench;
+
